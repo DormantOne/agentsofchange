@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Arc of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Sans+3:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--bg2:#12121a;--text:#e8e6e1;--dim:#8a8880;--accent:#c9a84c;--red:#c94c4c;--green:#4cc97a;--blue:#4c8ec9;--purple:#9b6cc9;--fd:'Playfair Display',Georgia,serif;--fb:'Source Sans 3',sans-serif;--fm:'JetBrains Mono',monospace}
+html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-family:var(--fb);overflow:hidden;-webkit-font-smoothing:antialiased}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+.topbar{position:fixed;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:100;background:rgba(10,10,15,0.88);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,0.1)}
+.topbar-title{font-family:var(--fm);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--accent)}
+.topbar-controls{display:flex;align-items:center;gap:12px}
+.slide-counter{font-family:var(--fm);font-size:11px;color:var(--dim)}
+.btn{background:none;border:1px solid rgba(255,255,255,0.12);color:var(--text);font-family:var(--fm);font-size:10px;letter-spacing:1px;padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.progress-track{position:fixed;top:50px;left:0;right:0;height:2px;background:rgba(255,255,255,0.04);z-index:100}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#e8d5a0);width:0%;transition:width .4s}
+.slides-viewport{position:fixed;inset:52px 0 54px 0;overflow:hidden}
+.slide{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;opacity:0;transform:translateY(20px);transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1);pointer-events:none}
+.slide.active{opacity:1;transform:translateY(0);pointer-events:auto}
+.slide.exiting{opacity:0;transform:translateY(-20px)}
+.slide.full-width{grid-template-columns:1fr}
+.slide-text{padding:32px 36px 32px 44px;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,0.2) transparent}
+.slide-text::-webkit-scrollbar{width:3px}
+.slide-text::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.2);border-radius:2px}
+.slide-viz{position:relative;display:flex;align-items:center;justify-content:center;padding:16px}
+.slide-viz canvas{width:100%;height:100%}
+.slide-number{font-family:var(--fm);font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;opacity:0;transform:translateY(8px);transition:all .5s .1s}
+.active .slide-number{opacity:1;transform:translateY(0)}
+h1{font-family:var(--fd);font-size:clamp(28px,3.5vw,48px);font-weight:900;line-height:1.1;margin-bottom:14px;opacity:0;transform:translateY(10px);transition:all .5s .15s}
+.active h1{opacity:1;transform:translateY(0)}
+h1 em{font-style:italic;color:var(--accent)}
+.subtitle{font-family:var(--fd);font-style:italic;font-size:clamp(14px,1.8vw,19px);color:var(--dim);margin-bottom:20px;opacity:0;transform:translateY(10px);transition:all .5s .2s}
+.active .subtitle{opacity:1;transform:translateY(0)}
+.narration-body{font-size:15px;line-height:1.8;color:rgba(232,230,225,0.35);font-weight:300;max-width:560px;opacity:0;transform:translateY(10px);transition:all .5s .25s}
+.active .narration-body{opacity:1;transform:translateY(0)}
+.w{transition:color .12s,text-shadow .12s;border-radius:2px}
+.w.spoken{color:rgba(232,230,225,0.95)!important;text-shadow:0 0 20px rgba(201,168,76,0.25)}
+.w.hl.spoken{color:var(--accent)!important;text-shadow:0 0 24px rgba(201,168,76,0.35);font-weight:600}
+.w.past{color:rgba(232,230,225,0.55)}
+.w.hl.past{color:rgba(201,168,76,0.55);font-weight:600}
+.tech-stack{margin-top:18px;display:flex;flex-direction:column;gap:5px;opacity:0;transform:translateY(10px);transition:all .5s .35s}
+.active .tech-stack{opacity:1;transform:translateY(0)}
+.ts-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ts-box{background:var(--bg2);border:1px solid rgba(255,255,255,0.06);border-radius:5px;padding:7px 12px;font-size:11px;font-family:var(--fm);letter-spacing:.3px;color:var(--dim);transition:all .3s}
+.ts-box.hl-tech{border-color:var(--accent);color:var(--accent)}
+.ts-arrow{color:rgba(255,255,255,0.12);font-size:14px}
+.ts-label{font-family:var(--fm);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.18);min-width:56px}
+.ts-down{text-align:center;color:rgba(255,255,255,0.08);font-size:12px;margin-left:60px}
+.bottombar{position:fixed;bottom:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(10,10,15,0.9);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,0.04);z-index:100}
+.dot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:none;cursor:pointer;transition:all .3s;flex-shrink:0}
+.dot.visited{background:rgba(201,168,76,0.2);border-color:rgba(201,168,76,0.5)}
+.dot.current{background:var(--accent);border-color:var(--accent);transform:scale(1.4)}
+.nav-btn{background:none;border:1px solid rgba(255,255,255,0.1);color:var(--dim);font-family:var(--fm);font-size:10px;letter-spacing:1px;padding:7px 18px;border-radius:4px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.nav-btn.next-btn{border-color:var(--accent);color:var(--accent)}
+.nav-btn.next-btn:hover{background:var(--accent);color:var(--bg)}
+.title-center{text-align:center;max-width:680px;margin:0 auto}
+.title-center h1{font-size:clamp(34px,5vw,68px)}
+.author{font-family:var(--fm);font-size:10px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-top:24px;opacity:0;transition:all .6s .5s}
+.active .author{opacity:1}
+@media(max-width:900px){.slide{grid-template-columns:1fr!important}.slide-viz{display:none!important}.slide-text{padding:20px 18px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-title">The Arc of Intelligence</div>
+  <div class="topbar-controls">
+    <span class="slide-counter" id="slideCounter">1 / 11</span>
+    <button class="btn" id="btnMute" onclick="toggleMute()">Mute</button>
+  </div>
+</div>
+<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+<div class="slides-viewport" id="viewport"></div>
+<div class="bottombar">
+  <button class="nav-btn" onclick="prev()">&#8592; Prev</button>
+  <div id="dots"></div>
+  <button class="nav-btn next-btn" id="nextBtn" onclick="next()">Next &#8594;</button>
+</div>
+
+<script>
+const SLIDES=[
+{id:'title',full:true,number:'A Briefing',title:'The Arc of <em>Intelligence</em>',subtitle:'From language transformers to autonomous agents — how AI learned to read, reason, and act.',narration:'The Arc of Intelligence. From language transformers to autonomous agents — how AI learned to read, reason, and act. This presentation walks through the key leaps in AI capability, what they mean, and where the real risks and opportunities lie.',viz:'none',extra:'<div class="author">An honest tour for smart people who don\'t live in the codebase</div>'},
+{id:'transformer',number:'Chapter 01',title:'The <em>Transformer</em>',subtitle:'"Attention Is All You Need" — Google, 2017',narration:'Before 2017, AI read text one word at a time, left to right, like a slow reader running a finger across a page. The Transformer changed everything. It processes an entire passage simultaneously, letting every word ask every other word: how relevant are you to me? This is called self-attention. Every token attends to every other token in parallel. The result was dramatically faster training. And crucially, it scaled. The more data and compute you fed it, the better it got. That scalability turned out to be the single most important property in modern AI. Without the Transformer, none of what follows would exist.',viz:'attention',stack:[{label:'INPUT',boxes:['Tokenized Text']},{label:'CORE',boxes:['Self-Attention','Feed-Forward','Layer Norm'],hl:[0]},{label:'OUTPUT',boxes:['Next-Token Probability']}]},
+{id:'llm',number:'Chapter 02',title:'The <em>Large Language Model</em>',subtitle:'Scale reveals capabilities nobody programmed',narration:'Once you have an architecture that scales, the obvious question becomes: what happens if we make it enormous? The answer was Large Language Models. Take the Transformer. Train it on essentially the entire internet — books, code, conversations, Wikipedia. Scale to hundreds of billions of parameters. What emerged was unexpected. These models did not just learn grammar. They learned facts, reasoning patterns, coding ability, translation, even a form of common sense. Nobody explicitly programmed these capabilities. They emerged from scale — a phenomenon researchers call emergence. A model with ten billion parameters struggles with basic logic. The same architecture at a hundred billion can write legal briefs and debug software. We had built something whose capabilities we could not fully predict from its design.',viz:'network'},
+{id:'scale',number:'Chapter 03',title:'Scale Buys <em>Quality</em>',subtitle:'Bigger isn\'t just more — it\'s better and more honest',narration:'Why does scale matter so deeply? It is counterintuitive. You might assume a bigger model just memorizes more trivia. But what actually happens is that reasoning quality improves and hallucination — confidently stating false things — drops significantly. A small model is like a student who crammed the night before. Fragments of knowledge, loosely stitched, with gaps confidently filled with nonsense. A large model is more like an expert who has read broadly and deeply. It holds multiple overlapping representations of knowledge, letting it cross-check itself internally. Errors shift from outright fabrication to subtler misunderstandings. Scale is not about doing more. It is about doing things better. More coherent reasoning. Fewer confident mistakes. Better calibration of what the model does and does not know.',viz:'scale'},
+{id:'rag',number:'Chapter 04',title:'<em>Grounding</em> & Reasoning',subtitle:'RAG + Chain of Thought — a library card and a whiteboard',narration:'Even the best large language model has two fundamental limits. First, its knowledge is frozen at training time. It does not know what happened yesterday. Second, it can stumble on multi-step reasoning, jumping to conclusions rather than working through problems. Two techniques changed the game. Retrieval Augmented Generation, or RAG, lets the model search external documents before answering. Your company database, today\'s news, a legal corpus. Open-book exam instead of memory. This dramatically cuts hallucination on factual questions because the model can cite specific sources. Chain of Thought tackles reasoning. You ask the model to show its work — to reason step by step. This produces strikingly better results on math, logic, and analysis. The model catches its own errors mid-reasoning, just as you would on paper. Together, these turned LLMs from impressive but unreliable conversationalists into something closer to research assistants you could trust.',viz:'rag',stack:[{label:'QUERY',boxes:['User Question']},{label:'RETRIEVE',boxes:['Vector DB','Doc Search','Live Web'],hl:[0,1,2]},{label:'REASON',boxes:['Chain of Thought','Step-by-Step'],hl:[0]},{label:'OUTPUT',boxes:['Grounded Answer + Citations']}]},
+{id:'tools',number:'Chapter 05',title:'LLMs Learn to <em>Act</em>',subtitle:'Tool use — from narrator to actor',narration:'The next leap was letting the model act in the world — not just generate text, but use tools. A model with tool use can call a calculator for precise math. It can query a database. It can search the live web. It can invoke an API to book a flight, send an email, or execute code and inspect the result. This is a qualitative shift. The model decides what action to take, executes it, observes the result, and uses that to decide the next move. Think of the difference between someone who can talk about cooking and someone who can walk into a kitchen, pick up a knife, read a recipe, and actually make dinner. Tool use bridges that gap. The model becomes an actor, not a narrator. And the set of possible tools is essentially unbounded. Any API, any software interface becomes available.',viz:'tools',stack:[{label:'THINK',boxes:['LLM Reasoning']},{label:'DECIDE',boxes:['Select Tool + Arguments']},{label:'EXECUTE',boxes:['Calculator','Search','Code Exec','External APIs'],hl:[0,1,2,3]},{label:'OBSERVE',boxes:['Parse Result','Re-plan']}]},
+{id:'agent',number:'Chapter 06',title:'<em>Agentic</em> Systems',subtitle:'AI that pursues goals, not just answers questions',narration:'Now we arrive at the frontier: agentic systems. An agent is an AI that pursues goals over extended periods with minimal human oversight. It breaks complex objectives into sub-tasks, executes them with tools, monitors progress, recovers from errors, and knows when to ask a human for help. A chatbot answers one question at a time. An agent might research a market, draft a strategy document, build a financial model, contact vendors, and negotiate terms — potentially across days. Today\'s agents are brittle. They get confused, go in loops, miss edge cases. But each generation is meaningfully more capable. Better base models, better tool access, better planning. When agents work, they make possible entire categories of work that were previously too complex for automation, too tedious for humans to bother with.',viz:'agent'},
+{id:'benefits',number:'Chapter 07',title:'The <em>Upside</em>',subtitle:'Concrete benefits, not hype',narration:'Let us be concrete about the potential, because it is enormous. In science, these systems read every paper on a topic in minutes, spot contradictions, suggest novel hypotheses. Drug discovery timelines compress from decades to years. In business, knowledge work that consumes eighty percent of a professional\'s time — research, synthesis, drafting — becomes dramatically faster. A solo entrepreneur operates with the research capacity of a mid-size firm. Perhaps most profoundly: access. A farmer in rural Kenya gets the same quality of legal, medical, and financial reasoning as a Manhattan executive. Language barriers dissolve. The expertise premium collapses. Every student gets a patient tutor that adapts to their pace and never gives up on them. The common thread is democratization. AI does not just make elites more productive. It distributes capability that was previously concentrated.',viz:'benefits'},
+{id:'risks',number:'Chapter 08',title:'The <em>Risks</em>, Honestly',subtitle:'No sugarcoating — these are real and serious',narration:'Now the risks, frankly. Start with what I call keys to the kingdom. An agent that can send your emails, execute code, and access your databases acts with your authority. If it is compromised — through a prompt injection, poisoned data, or a misunderstood instruction — it is compromised as you. Today, the security model for autonomous agents is immature. We have sandboxing, permission scoping, human-in-the-loop checkpoints. But honestly, it is not solved. Then there is concentration of power. Training frontier models costs billions. Only a handful of organizations can do it. This creates natural oligopoly. Labor displacement will be real and uneven. Knowledge workers directly in the path. And misuse — persuasive disinformation, automated social engineering, accelerated weapons development. The same capabilities that make these tools powerful make them dangerous in the wrong hands.',viz:'risks'},
+{id:'path',number:'Chapter 09',title:'The <em>Path</em> Forward',subtitle:'Just as frictionless credit was figured out, secure agents will emerge',narration:'So where does this leave us? Here is the analogy I find most useful. In the early 1990s, typing a credit card number into a website was insane. No encryption, no payment processors, no fraud detection, no regulatory framework. People said e-commerce would never work because you would obviously get robbed. They were not wrong about the risks. They were wrong that the risks were unsolvable. What emerged was layered infrastructure. SSL encryption, then TLS. PCI compliance. Tokenization. Real-time fraud detection. Chargeback systems. Regulatory oversight. Not perfect — fraud still exists — but trillions flow through it daily. Agent security will follow the same arc. Cryptographic identity for AI actions. Tiered permissions. Immutable audit trails. AI monitoring AI. Insurance markets pricing agent risk. The current moment is messy. But the path from here to trustworthy agents is an engineering and governance problem, not a fundamental impossibility.',viz:'path',stack:[{label:'LAYER 1',boxes:['Cryptographic Identity']},{label:'LAYER 2',boxes:['Tiered Permissions','Capability Scoping'],hl:[0,1]},{label:'LAYER 3',boxes:['Immutable Audit','Anomaly Detection'],hl:[0,1]},{label:'LAYER 4',boxes:['Insurance','Regulation','Standards'],hl:[0,1,2]}]},
+{id:'close',full:true,number:'Closing',title:'The arc bends from <em>understanding</em> to <em>action</em>',subtitle:'The capabilities are real. The risks are real. The path forward is buildable.',narration:'The arc bends from understanding to action. From reading to reasoning to doing. Each stage builds on the last. The capabilities are real. The risks are real. The path forward is buildable. What matters now is who builds, how thoughtfully they build, and whether we distribute the gains or concentrate them. That is not a technical question. That is a human one. Thank you.',viz:'none',extra:'<div class="author" style="margin-top:36px">End of Briefing</div>'}
+];
+
+// ── BUILD DOM ──
+const viewport=document.getElementById('viewport');
+SLIDES.forEach((s,i)=>{
+  const d=document.createElement('div');
+  d.className='slide'+(i===0?' active':'')+(s.full?' full-width':'');
+  const words=s.narration.split(/(\s+)/);
+  let wHtml='',wIdx=0;
+  const hlTerms=/\b(transform|attention|self-attention|scale|scal|emerg|hallucin|retriev|rag|chain.of.thought|tool|agent|democrat|keys.to.the.kingdom|security|encrypt|trust|immature|unsolvable|concentrated|distribut)/i;
+  words.forEach(w=>{if(/^\s+$/.test(w)){wHtml+=w}else{const isHl=hlTerms.test(w.replace(/[.,!?;:'"]/g,''));wHtml+=`<span class="w${isHl?' hl':''}" data-wi="${wIdx}">${w}</span>`;wIdx++}});
+  let stackHtml='';
+  if(s.stack){stackHtml='<div class="tech-stack">';s.stack.forEach((r,ri)=>{stackHtml+='<div class="ts-row">';stackHtml+=`<span class="ts-label">${r.label}</span>`;r.boxes.forEach((b,bi)=>{if(bi>0)stackHtml+='<span class="ts-arrow">&#8594;</span>';stackHtml+=`<span class="ts-box${r.hl&&r.hl.includes(bi)?' hl-tech':''}">${b}</span>`});stackHtml+='</div>';if(ri<s.stack.length-1)stackHtml+='<div class="ts-down">&#8595;</div>'});stackHtml+='</div>'}
+  if(s.full){d.innerHTML=`<div class="slide-text" style="align-items:center"><div class="title-center"><div class="slide-number">${s.number}</div><h1>${s.title}</h1><div class="subtitle">${s.subtitle}</div><div class="narration-body" data-si="${i}">${wHtml}</div>${s.extra||''}</div></div>`}
+  else{d.innerHTML=`<div class="slide-text"><div><div class="slide-number">${s.number}</div><h1>${s.title}</h1><div class="subtitle">${s.subtitle}</div><div class="narration-body" data-si="${i}">${wHtml}</div>${stackHtml}${s.extra||''}</div></div><div class="slide-viz"><canvas id="c${i}"></canvas></div>`}
+  viewport.appendChild(d);
+});
+const slideEls=document.querySelectorAll('.slide'),total=slideEls.length;
+const dotsC=document.getElementById('dots');
+for(let i=0;i<total;i++){const d=document.createElement('div');d.className='dot'+(i===0?' current':'');d.onclick=()=>goSlide(i);dotsC.appendChild(d)}
+const dots=dotsC.querySelectorAll('.dot');
+
+// ── SPEECH + HIGHLIGHT ──
+const synth=window.speechSynthesis;
+let muted=false,currentSlide=0;
+function getVoice(){const v=synth.getVoices();const p=['Google UK English Male','Daniel','Google US English','Samantha','Alex','Karen'];for(const n of p){const f=v.find(x=>x.name.includes(n));if(f)return f}return v.find(x=>x.lang.startsWith('en'))||v[0]}
+
+function speakSlide(idx){
+  synth.cancel();clearHighlights();
+  if(muted)return;
+  const nb=document.querySelector(`.narration-body[data-si="${idx}"]`);
+  if(!nb)return;
+  const ws=nb.querySelectorAll('.w');
+  const text=SLIDES[idx].narration;
+  const utter=new SpeechSynthesisUtterance(text);
+  const voice=getVoice();if(voice)utter.voice=voice;
+  utter.rate=1.0;utter.pitch=1.0;
+  // Map char positions to word spans
+  const cmap=[];let si=0;
+  text.split(/(\s+)/).forEach(tok=>{if(/^\s+$/.test(tok)){si+=tok.length}else{cmap.push({s:si,e:si+tok.length,i:cmap.length});si+=tok.length}});
+  let lastIdx=-1;
+  utter.onboundary=e=>{if(e.name!=='word')return;const ci=e.charIndex;const m=cmap.find(p=>ci>=p.s&&ci<p.e);if(!m)return;const cur=m.i;if(cur===lastIdx)return;lastIdx=cur;
+    ws.forEach((w,j)=>{w.classList.remove('spoken');if(j<cur)w.classList.add('past');else w.classList.remove('past')});
+    if(ws[cur]){ws[cur].classList.add('spoken');ws[cur].scrollIntoView({behavior:'smooth',block:'nearest'})}
+    // Also light up a couple behind
+    for(let k=Math.max(0,cur-2);k<cur;k++){if(ws[k])ws[k].classList.add('spoken')}
+  };
+  utter.onend=()=>{ws.forEach(w=>{w.classList.remove('spoken');w.classList.add('past')})};
+  synth.speak(utter);
+  if(window._cf)clearInterval(window._cf);
+  window._cf=setInterval(()=>{if(synth.speaking){synth.pause();synth.resume()}else clearInterval(window._cf)},10000);
+}
+function clearHighlights(){document.querySelectorAll('.w.spoken,.w.past').forEach(w=>{w.classList.remove('spoken','past')})}
+function toggleMute(){muted=!muted;const b=document.getElementById('btnMute');b.textContent=muted?'Unmute':'Mute';b.classList.toggle('active',muted);if(muted){synth.cancel();clearHighlights()}else speakSlide(currentSlide)}
+
+// ── NAV ──
+function goSlide(n){if(n<0||n>=total||n===currentSlide)return;synth.cancel();clearHighlights();const old=slideEls[currentSlide];old.classList.remove('active');old.classList.add('exiting');setTimeout(()=>old.classList.remove('exiting'),700);currentSlide=n;slideEls[n].classList.add('active');updateUI();resizeCanvas(n);speakSlide(n)}
+function next(){goSlide(currentSlide+1)}function prev(){goSlide(currentSlide-1)}
+function updateUI(){dots.forEach((d,i)=>{d.classList.toggle('current',i===currentSlide);if(i<=currentSlide)d.classList.add('visited')});document.getElementById('slideCounter').textContent=(currentSlide+1)+' / '+total;document.getElementById('progressFill').style.width=(currentSlide/(total-1)*100)+'%';document.getElementById('nextBtn').innerHTML=currentSlide>=total-1?'End':'Next &#8594;'}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next()}if(e.key==='ArrowLeft')prev();if(e.key==='m')toggleMute()});
+
+// ── CANVAS ──
+function resizeCanvas(idx){const c=document.getElementById('c'+idx);if(!c)return;const r=c.parentElement.getBoundingClientRect();c.width=r.width*devicePixelRatio;c.height=r.height*devicePixelRatio;c.style.width=r.width+'px';c.style.height=r.height+'px'}
+function resizeAll(){for(let i=0;i<total;i++)resizeCanvas(i)}
+window.addEventListener('resize',resizeAll);
+
+let t=0;
+function animate(){
+  t+=0.016;
+  const c=document.getElementById('c'+currentSlide);
+  if(c){
+    const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+    ctx.save();const dpr=devicePixelRatio;ctx.scale(dpr,dpr);
+    const w=c.width/dpr,h=c.height/dpr;
+    const fn=VIZ[SLIDES[currentSlide].viz];
+    if(fn)fn(ctx,w,h,t);
+    ctx.restore();
+  }
+  requestAnimationFrame(animate);
+}
+
+function drawNode(ctx,x,y,r,color,glow){
+  if(glow){ctx.beginPath();ctx.arc(x,y,r*2.8,0,Math.PI*2);const g=ctx.createRadialGradient(x,y,r*.3,x,y,r*2.8);g.addColorStop(0,color+'45');g.addColorStop(1,color+'00');ctx.fillStyle=g;ctx.fill()}
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()}
+
+// ═══════════════════════════════
+//  VISUALIZATIONS
+// ═══════════════════════════════
+const VIZ={};
+const A='#c9a84c',B='#4c8ec9',G='#4cc97a',R='#c94c4c',P='#9b6cc9',D='#8a8880';
+
+// ── ATTENTION: tokens in circle with animated attention arcs ──
+VIZ.attention=(ctx,w,h,t)=>{
+  const tokens=['The','cat','sat','on','the','mat','watching','birds','fly','south'];
+  const n=tokens.length,cx=w/2,cy=h/2,rad=Math.min(w,h)*.34;
+  const pos=[];
+  for(let i=0;i<n;i++){const a=(i/n)*Math.PI*2-Math.PI/2;pos.push({x:cx+Math.cos(a)*rad,y:cy+Math.sin(a)*rad})}
+  const fi=Math.floor(t*.7)%n;
+  // Attention weights (hand-crafted for illustration)
+  const weights=Array(n).fill(0).map((_,i)=>{
+    if(i===fi)return 0;
+    const d=Math.min(Math.abs(i-fi),n-Math.abs(i-fi));
+    return Math.max(0.05,1-d*0.18+Math.sin(i*2.1+fi)*0.15);
+  });
+  // Draw arcs
+  for(let i=0;i<n;i++){
+    if(i===fi)continue;
+    const wt=weights[i];const pulse=.5+.5*Math.sin(t*3+i);
+    const alpha=wt*(.25+.55*pulse);
+    const bend=15+wt*25;
+    const mx=(pos[fi].x+pos[i].x)/2,my=(pos[fi].y+pos[i].y)/2;
+    const dx=mx-cx,dy=my-cy,dl=Math.sqrt(dx*dx+dy*dy)||1;
+    ctx.beginPath();ctx.moveTo(pos[fi].x,pos[fi].y);
+    ctx.quadraticCurveTo(mx+dx/dl*bend,my+dy/dl*bend,pos[i].x,pos[i].y);
+    ctx.strokeStyle=A;ctx.globalAlpha=alpha;ctx.lineWidth=wt*3+.5;ctx.stroke()
+  }
+  ctx.globalAlpha=1;
+  // Nodes
+  for(let i=0;i<n;i++){
+    const isF=i===fi,r=isF?22:15;
+    if(isF)drawNode(ctx,pos[i].x,pos[i].y,32,A,true);
+    ctx.beginPath();ctx.arc(pos[i].x,pos[i].y,r,0,Math.PI*2);
+    ctx.fillStyle=isF?'#1e1a10':'#16161f';ctx.fill();
+    ctx.strokeStyle=isF?A:'rgba(255,255,255,0.08)';ctx.lineWidth=isF?2:1;ctx.stroke();
+    ctx.font=`${isF?'600':'400'} ${isF?12:10}px 'Source Sans 3',sans-serif`;
+    ctx.fillStyle=isF?'#fff':D;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(tokens[i],pos[i].x,pos[i].y)
+  }
+  ctx.font="500 10px 'JetBrains Mono',monospace";ctx.fillStyle=A;ctx.textAlign='center';
+  ctx.fillText(`Attending from: "${tokens[fi]}"`,cx,h-18);
+  ctx.fillStyle='rgba(255,255,255,0.15)';ctx.fillText('Self-Attention Heads',cx,20);
+};
+
+// ── NETWORK: deep layers ──
+VIZ.network=(ctx,w,h,t)=>{
+  const layers=[5,8,12,16,12,8,5];
+  const lx=layers.map((_,i)=>40+(w-80)*(i/(layers.length-1)));
+  const nodes=[];
+  layers.forEach((cnt,li)=>{const ln=[];for(let ni=0;ni<cnt;ni++){const y=h/2+(ni-(cnt-1)/2)*Math.min((h-50)/cnt,28);ln.push({x:lx[li],y})}nodes.push(ln)});
+  // Connections
+  for(let li=0;li<nodes.length-1;li++){
+    for(let a=0;a<nodes[li].length;a++){for(let b=0;b<nodes[li+1].length;b++){
+      const na=nodes[li][a],nb=nodes[li+1][b];
+      const dist=Math.abs(a/(nodes[li].length-1||1)-b/(nodes[li+1].length-1||1));
+      const wt=Math.max(0,1-dist*2.2);
+      const sig=Math.sin(t*3-li*.8+a*.3)*.5+.5;
+      ctx.beginPath();ctx.moveTo(na.x,na.y);ctx.lineTo(nb.x,nb.y);
+      ctx.strokeStyle=A;ctx.globalAlpha=wt*.05+sig*wt*.07;ctx.lineWidth=.6;ctx.stroke()
+    }}
+  }
+  ctx.globalAlpha=1;
+  // Nodes
+  nodes.forEach((layer,li)=>{layer.forEach((n,ni)=>{
+    const mid=li===3;const sig=Math.sin(t*2.5-li+ni*.4)*.5+.5;
+    const r=mid?4:2.5;const color=mid?A:B;
+    if(mid&&sig>.7)drawNode(ctx,n.x,n.y,10,A,true);
+    ctx.beginPath();ctx.arc(n.x,n.y,r,0,Math.PI*2);ctx.fillStyle=color;ctx.globalAlpha=.3+sig*.7;ctx.fill();ctx.globalAlpha=1
+  })});
+  // Labels
+  ctx.font="500 9px 'JetBrains Mono',monospace";ctx.fillStyle=D;ctx.textAlign='center';
+  ctx.fillText('INPUT',lx[0],h-12);ctx.fillText('HIDDEN LAYERS',lx[3],h-12);ctx.fillText('OUTPUT',lx[6],h-12);
+  const pc=Math.floor((Math.sin(t*.5)*.5+.5)*900+100);
+  ctx.font="600 12px 'JetBrains Mono',monospace";ctx.fillStyle=A;ctx.fillText(pc+'B parameters',w/2,22);
+};
+
+// ── SCALE: dual sigmoid charts ──
+VIZ.scale=(ctx,w,h,t)=>{
+  const pW=w*.7,pH=h*.28,pX=(w-pW)/2;
+  // Top: quality up
+  let y1=h*.15;
+  ctx.font="500 9px 'JetBrains Mono',monospace";ctx.fillStyle=G;ctx.textAlign='left';ctx.fillText('REASONING QUALITY',pX,y1-6);
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pX,y1);ctx.lineTo(pX,y1+pH);ctx.lineTo(pX+pW,y1+pH);ctx.stroke();
+  ctx.beginPath();for(let x=0;x<=pW;x++){const p=x/pW,v=1/(1+Math.exp(-8*(p-.4)));const px=pX+x,py=y1+pH-v*pH*.85;x===0?ctx.moveTo(px,py):ctx.lineTo(px,py)}
+  ctx.strokeStyle=G;ctx.lineWidth=2.5;ctx.stroke();
+  const dp=(Math.sin(t*.35)*.5+.5);const dx=pX+dp*pW,dv=1/(1+Math.exp(-8*(dp-.4))),dy=y1+pH-dv*pH*.85;
+  drawNode(ctx,dx,dy,4,G,true);
+  // Bottom: hallucination down
+  let y2=h*.56;
+  ctx.fillStyle=R;ctx.textAlign='left';ctx.fillText('HALLUCINATION RATE',pX,y2-6);
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pX,y2);ctx.lineTo(pX,y2+pH);ctx.lineTo(pX+pW,y2+pH);ctx.stroke();
+  ctx.beginPath();for(let x=0;x<=pW;x++){const p=x/pW,v=1-1/(1+Math.exp(-7*(p-.35)));const px=pX+x,py=y2+pH-v*pH*.85;x===0?ctx.moveTo(px,py):ctx.lineTo(px,py)}
+  ctx.strokeStyle=R;ctx.lineWidth=2.5;ctx.stroke();
+  const dv2=1-1/(1+Math.exp(-7*(dp-.35))),dy2=y2+pH-dv2*pH*.85;
+  drawNode(ctx,dx,dy2,4,R,true);
+  // X labels
+  ctx.fillStyle=D;ctx.font="400 9px 'JetBrains Mono',monospace";ctx.textAlign='center';
+  ctx.fillText('1B',pX,y2+pH+14);ctx.fillText('10B',pX+pW*.33,y2+pH+14);ctx.fillText('100B',pX+pW*.66,y2+pH+14);ctx.fillText('1T+',pX+pW,y2+pH+14);
+  ctx.fillText('MODEL SCALE \u2192',w/2,y2+pH+28);
+};
+
+// ── RAG: retrieval + chain of thought flow ──
+VIZ.rag=(ctx,w,h,t)=>{
+  const cx=w/2,cy=h/2;
+  // LLM center
+  ctx.beginPath();ctx.arc(cx,cy,36,0,Math.PI*2);ctx.fillStyle='#14142a';ctx.fill();ctx.strokeStyle=A;ctx.lineWidth=2;ctx.stroke();
+  ctx.font="700 11px 'JetBrains Mono',monospace";ctx.fillStyle=A;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('LLM',cx,cy);
+  // Left: docs
+  const docs=[{label:'Docs',y:-55},{label:'Web',y:0},{label:'DB',y:55}];
+  docs.forEach((d,i)=>{
+    const dx=cx-155+Math.sin(t*1.4+i)*6,dy=cy+d.y+Math.cos(t*1.1+i*2)*4;
+    ctx.beginPath();ctx.moveTo(dx+28,dy);ctx.lineTo(cx-42,cy);ctx.strokeStyle='rgba(76,142,201,0.15)';ctx.lineWidth=1;ctx.stroke();
+    const pp=(t*.4+i*.33)%1,px=dx+28+(cx-42-dx-28)*pp,py=dy+(cy-dy)*pp;
+    drawNode(ctx,px,py,2.5,B,true);
+    rrect(ctx,dx-26,dy-14,54,28,5);ctx.fillStyle='#13132a';ctx.fill();ctx.strokeStyle='rgba(76,142,201,0.25)';ctx.lineWidth=1;ctx.stroke();
+    ctx.font="400 10px 'Source Sans 3',sans-serif";ctx.fillStyle=B;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(d.label,dx,dy)
+  });
+  // Right: CoT steps
+  const steps=['Parse','Reason','Check','Answer'];
+  steps.forEach((s,i)=>{
+    const sx=cx+85+i*52,sy=cy+Math.sin(t*1.8+i*1.4)*6;
+    const prevX=i===0?cx+42:cx+85+(i-1)*52;
+    ctx.beginPath();ctx.moveTo(prevX+(i===0?0:16),i===0?cy:cy+Math.sin(t*1.8+(i-1)*1.4)*6);ctx.lineTo(sx-16,sy);
+    ctx.strokeStyle='rgba(76,201,122,0.12)';ctx.lineWidth=1;ctx.stroke();
+    const active=Math.floor(t*.8)%4===i;
+    ctx.beginPath();ctx.arc(sx,sy,16,0,Math.PI*2);ctx.fillStyle=active?'#142a14':'#141420';ctx.fill();
+    ctx.strokeStyle=active?G:'rgba(76,201,122,0.15)';ctx.lineWidth=active?2:1;ctx.stroke();
+    ctx.font=`${active?'600':'400'} 8px 'JetBrains Mono',monospace`;ctx.fillStyle=active?G:D;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(s,sx,sy)
+  });
+  ctx.font="500 8px 'JetBrains Mono',monospace";ctx.fillStyle='rgba(76,142,201,0.5)';ctx.textAlign='center';ctx.fillText('RETRIEVAL',cx-155,cy-85);
+  ctx.fillStyle='rgba(76,201,122,0.5)';ctx.fillText('CHAIN OF THOUGHT',cx+195,cy-85);
+};
+
+// ── TOOLS: hub & spoke ──
+VIZ.tools=(ctx,w,h,t)=>{
+  const cx=w/2,cy=h/2,R=36;
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);const gr=ctx.createRadialGradient(cx,cy,0,cx,cy,R);gr.addColorStop(0,'#22223a');gr.addColorStop(1,'#14142a');ctx.fillStyle=gr;ctx.fill();ctx.strokeStyle=A;ctx.lineWidth=2;ctx.stroke();
+  ctx.font="700 10px 'JetBrains Mono',monospace";ctx.fillStyle=A;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('LLM',cx,cy-5);
+  ctx.font="400 7px 'JetBrains Mono',monospace";ctx.fillStyle=D;ctx.fillText('decides',cx,cy+7);
+  const tools=[{l:'Calculate',c:B,a:0},{l:'Search',c:G,a:Math.PI*.4},{l:'Code',c:P,a:Math.PI*.8},{l:'Email',c:'#c9844c',a:Math.PI*1.2},{l:'Database',c:'#4cc9c9',a:Math.PI*1.6}];
+  const dist=Math.min(w,h)*.3,ai=Math.floor(t*.6)%tools.length;
+  tools.forEach((tl,i)=>{
+    const ang=tl.a-Math.PI/2,tx=cx+Math.cos(ang)*dist,ty=cy+Math.sin(ang)*dist,isA=i===ai;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(tx,ty);ctx.strokeStyle=tl.c;ctx.globalAlpha=isA?.4:.07;ctx.lineWidth=isA?1.5:1;ctx.stroke();ctx.globalAlpha=1;
+    if(isA){const pp=(t*1.5)%1,goOut=Math.floor(t*1.5)%2===0,p=goOut?pp:1-pp;drawNode(ctx,cx+(tx-cx)*p,cy+(ty-cy)*p,3.5,tl.c,true)}
+    ctx.beginPath();ctx.arc(tx,ty,22,0,Math.PI*2);ctx.fillStyle=isA?'#16162a':'#111118';ctx.fill();ctx.strokeStyle=isA?tl.c:'rgba(255,255,255,0.06)';ctx.lineWidth=isA?1.5:1;ctx.stroke();
+    ctx.font=`${isA?'600':'400'} 9px 'Source Sans 3',sans-serif`;ctx.fillStyle=isA?tl.c:D;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(tl.l,tx,ty)
+  });
+  ctx.font="400 8px 'JetBrains Mono',monospace";ctx.fillStyle='rgba(255,255,255,0.15)';ctx.textAlign='center';ctx.fillText('THINK \u2192 ACT \u2192 OBSERVE \u2192 REPEAT',cx,h-14);
+};
+
+// ── AGENT: goal loop ──
+VIZ.agent=(ctx,w,h,t)=>{
+  const cx=w/2,cy=h/2,R=Math.min(w,h)*.27;
+  const steps=['GOAL','PLAN','ACT','OBSERVE','EVALUATE'],n=steps.length;
+  // Ring
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=28;ctx.stroke();
+  const sw=(t*.3)%(Math.PI*2);ctx.beginPath();ctx.arc(cx,cy,R,sw,sw+Math.PI*.5);ctx.strokeStyle=A+'25';ctx.lineWidth=28;ctx.stroke();
+  const asi=Math.floor(t*.6)%n;
+  steps.forEach((label,i)=>{
+    const ang=(i/n)*Math.PI*2-Math.PI/2,x=cx+Math.cos(ang)*R,y=cy+Math.sin(ang)*R,isA=i===asi;
+    if(isA)drawNode(ctx,x,y,28,A,true);
+    ctx.beginPath();ctx.arc(x,y,18,0,Math.PI*2);ctx.fillStyle=isA?'#1e1a10':'#111118';ctx.fill();ctx.strokeStyle=isA?A:'rgba(255,255,255,0.08)';ctx.lineWidth=isA?2:1;ctx.stroke();
+    ctx.font=`${isA?'600':'400'} 7px 'JetBrains Mono',monospace`;ctx.fillStyle=isA?A:D;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,x,y);
+    // Arrow hint
+    const na=(((i+1)%n)/n)*Math.PI*2-Math.PI/2,midA=((i+.5)/n)*Math.PI*2-Math.PI/2;
+    const arX=cx+Math.cos(midA)*(R),arY=cy+Math.sin(midA)*(R);
+    ctx.font="400 8px sans-serif";ctx.fillStyle='rgba(201,168,76,0.2)';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('\u203A',arX,arY);
+  });
+  ctx.font="600 12px 'JetBrains Mono',monospace";ctx.fillStyle=A;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('AGENT',cx,cy-7);
+  ctx.font="400 9px 'Source Sans 3',sans-serif";ctx.fillStyle=D;ctx.fillText('Autonomous Loop',cx,cy+8);
+  // Human override
+  const ha=-Math.PI/2-.3,hx=cx+Math.cos(ha)*(R+45),hy=cy+Math.sin(ha)*(R+45);
+  ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(cx+Math.cos(ha)*(R+14),cy+Math.sin(ha)*(R+14));ctx.lineTo(hx,hy);ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+  ctx.font="400 8px 'JetBrains Mono',monospace";ctx.fillStyle=D;ctx.textAlign='center';ctx.fillText('Human Override',hx,hy+12);
+};
+
+// ── BENEFITS: global nodes ──
+VIZ.benefits=(ctx,w,h,t)=>{
+  const cx=w/2,cy=h/2,gR=Math.min(w,h)*.34;
+  ctx.beginPath();ctx.arc(cx,cy,gR,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;ctx.stroke();
+  for(let i=0;i<5;i++){const a=i*Math.PI/5+t*.08;ctx.beginPath();ctx.ellipse(cx,cy,gR,gR*Math.abs(Math.cos(a)),0,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,0.02)';ctx.lineWidth=.5;ctx.stroke()}
+  const nodes=[];for(let i=0;i<24;i++){const ang=(i/24)*Math.PI*2+Math.sin(i*1.7)*.4;const dist=gR*(.45+Math.abs(Math.sin(i*2.3))*.55);nodes.push({x:cx+Math.cos(ang)*dist,y:cy+Math.sin(ang)*dist*.7,ph:i*.65})}
+  nodes.forEach((a,i)=>{nodes.forEach((b,j)=>{if(j<=i)return;const d=Math.hypot(a.x-b.x,a.y-b.y);if(d>130)return;const pulse=Math.sin(t*2+a.ph+b.ph)*.5+.5;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=G;ctx.globalAlpha=(1-d/130)*.08*pulse;ctx.lineWidth=.7;ctx.stroke()})});
+  ctx.globalAlpha=1;
+  nodes.forEach(n=>{const pulse=Math.sin(t*2.5+n.ph)*.5+.5;drawNode(ctx,n.x,n.y,2.5+pulse*2.5,G,pulse>.7)});
+  ctx.font="500 9px 'JetBrains Mono',monospace";ctx.fillStyle='rgba(76,201,122,0.35)';ctx.textAlign='center';ctx.fillText('DISTRIBUTED CAPABILITY',cx,h-14);
+};
+
+// ── RISKS: keyhole + cracks ──
+VIZ.risks=(ctx,w,h,t)=>{
+  const cx=w/2,cy=h/2-10,kr=44;
+  ctx.beginPath();ctx.arc(cx,cy,kr,0,Math.PI*2);ctx.fillStyle='#0c0c16';ctx.fill();ctx.strokeStyle='rgba(201,76,76,0.25)';ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy-5,13,0,Math.PI*2);ctx.fillStyle=R+'25';ctx.fill();
+  ctx.beginPath();ctx.moveTo(cx-7,cy+3);ctx.lineTo(cx+7,cy+3);ctx.lineTo(cx+3,cy+25);ctx.lineTo(cx-3,cy+25);ctx.closePath();ctx.fillStyle=R+'25';ctx.fill();
+  for(let i=0;i<8;i++){const ang=(i/8)*Math.PI*2,len=35+Math.sin(t*3+i*1.5)*12;const x1=cx+Math.cos(ang)*kr,y1=cy+Math.sin(ang)*kr,x2=cx+Math.cos(ang)*(kr+len),y2=cy+Math.sin(ang)*(kr+len);const mx=(x1+x2)/2+Math.sin(ang*3)*10,my=(y1+y2)/2+Math.cos(ang*3)*10;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(mx,my);ctx.lineTo(x2,y2);ctx.strokeStyle=R;ctx.globalAlpha=.12+Math.sin(t*4+i)*.08;ctx.lineWidth=1.3;ctx.stroke()}
+  ctx.globalAlpha=1;
+  const pR=kr+25+Math.sin(t*2)*18;ctx.beginPath();ctx.arc(cx,cy,pR,0,Math.PI*2);ctx.strokeStyle=R;ctx.globalAlpha=.06;ctx.lineWidth=1;ctx.stroke();ctx.globalAlpha=1;
+  const risks=[{l:'Prompt Injection',a:-.8},{l:'Data Poisoning',a:-.1},{l:'Authority Misuse',a:.5},{l:'Disinformation',a:1.1}];
+  const rd=Math.min(w,h)*.36;
+  risks.forEach((r,i)=>{const x=cx+Math.cos(r.a)*rd,y=cy+Math.sin(r.a)*rd;const pulse=Math.sin(t*3+i*1.5)*.5+.5;ctx.font=`${pulse>.7?'600':'400'} 9px 'JetBrains Mono',monospace`;ctx.fillStyle=R;ctx.globalAlpha=.25+pulse*.5;ctx.textAlign='center';ctx.fillText(r.l,x,y);ctx.globalAlpha=1});
+  ctx.font="500 9px 'JetBrains Mono',monospace";ctx.fillStyle='rgba(201,76,76,0.35)';ctx.textAlign='center';ctx.fillText('KEYS TO THE KINGDOM',cx,h-14);
+};
+
+// ── PATH: security layers stacking ──
+VIZ.path=(ctx,w,h,t)=>{
+  const layers=[{l:'CRYPTOGRAPHIC IDENTITY',c:A},{l:'TIERED PERMISSIONS',c:B},{l:'IMMUTABLE AUDIT TRAILS',c:G},{l:'AI MONITORING AI',c:P},{l:'REGULATION & INSURANCE',c:'#c9844c'}];
+  const bW=w*.6,lH=h*.11;
+  layers.forEach((l,i)=>{
+    const y=h*.72-i*(lH+6),lw=bW-i*20,x=(w-lw)/2;
+    const bp=Math.min(1,Math.max(0,t*.25-i*.35));if(bp<=0)return;
+    const aw=lw*bp,ax=(w-aw)/2;
+    rrect(ctx,ax,y,aw,lH,5);ctx.fillStyle=l.c+'12';ctx.fill();ctx.strokeStyle=l.c+'35';ctx.lineWidth=1;ctx.stroke();
+    const shim=Math.sin(t*2+i*1.2)*.5+.5;
+    rrect(ctx,ax,y,aw,lH,5);ctx.fillStyle=l.c+(shim>.7?'18':'08');ctx.fill();
+    ctx.font="600 9px 'JetBrains Mono',monospace";ctx.fillStyle=l.c;ctx.globalAlpha=bp;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(l.l,w/2,y+lH/2);ctx.globalAlpha=1
+  });
+  ctx.save();ctx.translate(20,h/2);ctx.rotate(-Math.PI/2);ctx.font="400 8px 'JetBrains Mono',monospace";ctx.fillStyle=D;ctx.textAlign='center';ctx.fillText('TRUST STACK \u2192',0,0);ctx.restore();
+};
+
+// ── INIT ──
+if(synth.onvoiceschanged!==undefined)synth.onvoiceschanged=()=>{};
+updateUI();
+setTimeout(()=>{resizeAll();requestAnimationFrame(animate)},100);
+setTimeout(()=>speakSlide(0),1000);
+</script>
+</body>
+</html> 
